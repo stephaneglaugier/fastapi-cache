@@ -15,7 +15,8 @@ from typing import (
 
 import pendulum
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseConfig, ValidationError, fields
+from pydantic import BaseConfig, ValidationError
+from pydantic.v1 import fields
 from starlette.responses import JSONResponse
 from starlette.templating import (
     _TemplateResponse as TemplateResponse,  # pyright: ignore[reportPrivateUsage]
@@ -82,7 +83,9 @@ class Coder:
         ...
 
     @classmethod
-    def decode_as_type(cls, value: bytes, *, type_: Optional[_T]) -> Union[_T, Any]:
+    def decode_as_type(
+        cls, value: bytes, *, type_: Optional[_T]
+    ) -> Union[_T, Any]:
         """Decode value to the specific given type
 
         The default implementation uses the Pydantic model system to convert the value.
@@ -94,7 +97,10 @@ class Coder:
                 field = cls._type_field_cache[type_]
             except KeyError:
                 field = cls._type_field_cache[type_] = fields.ModelField(
-                    name="body", type_=type_, class_validators=None, model_config=BaseConfig
+                    name="body",
+                    type_=type_,
+                    class_validators=None,
+                    model_config=BaseConfig,
                 )
             result, errors = field.validate(result, {}, loc=())
             if errors is not None:
